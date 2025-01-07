@@ -1,0 +1,31 @@
+# Python
+*.pyc
+__pycache__/
+
+# Environment Variables
+.env
+
+# Virtual Environment
+venv/
+
+# Database
+*.sqlite3
+
+# Logs
+*.log
+
+# OS-Specific
+.DS_Store
+
+# Django Static/Media
+staticfiles/
+media/
+
+# Node.js (if using frontend)
+node_modules/
+dist/
+build/
+
+# IDE Settings
+.vscode/
+.idea/
