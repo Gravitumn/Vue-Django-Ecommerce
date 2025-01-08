@@ -34,7 +34,12 @@ def login_view(request):
     if user:
         login(request, user)
         print(f"Logged-in user's role: {request.user.role}")
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True,'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'role': user.role
+            }})
     return JsonResponse(
         {'success': False, 'message': 'Invalid credentials'}, status=401
     )
@@ -50,7 +55,7 @@ def logout_view(request):
 def user(request):
     if request.user.is_authenticated:
         return JsonResponse(
-            {'username': request.user.username, 'email': request.user.email, 'password':request.user.password, 'role':request.user.role}
+            {'username': request.user.username, 'email': request.user.email, 'password':request.user.password, 'role':request.user.role, 'id':request.user.id}
         )
     return JsonResponse(
         {'message': 'Not logged in'}, status=401

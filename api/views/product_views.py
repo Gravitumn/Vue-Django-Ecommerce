@@ -16,23 +16,28 @@ def add_product(request):
         product = form.save()
         return JsonResponse({'message': 'Product added successfully', 'product_id': product.id}, status=201)
     return JsonResponse({'errors': form.errors}, status=400)
-    
+
+#Get all products in database for "ADMIN", 
+#if used by "USER" return all products added by that user
 @require_http_methods(['GET'])
 def get_all_products(request):
     if request.user.role == User.ADMIN:
-        products = Product.objects.values('id','name','price','image')
+        products = Product.objects.values('id','name','price','image','user')
         for product in products:
             if product['image']:
                 product['image'] = request.build_absolute_uri(default_storage.url(product['image']))
         return JsonResponse(list(products),safe=False)
-    return JsonResponse({'message': 'Access denied: Admins only'}, status=403)
+    else:
+        products = Product.objects.filter(user=request.user).values('id', 'name', 'price', 'image')
+        for product in products:
+            if product['image']:
+                product['image'] = request.build_absolute_uri(default_storage.url(product['image']))
+        return JsonResponse(list(products), safe=False)
+
 
 @require_http_methods(['PUT'])
 def update_product(request, product_id):
-    if request.user.role != User.ADMIN:
-        return JsonResponse({'message': 'Access denied: Admins only'}, status=403)
-    
-    
+
     try:
         product = Product.objects.get(id=product_id)
         if request.body:
@@ -56,10 +61,6 @@ def update_product(request, product_id):
 
 @require_http_methods(['POST'])
 def update_product_image(request, product_id):
-    if request.user.role != User.ADMIN:
-        return JsonResponse({'message': 'Access denied: Admins only'}, status=403)
-    
-        # IMAGE
     if request.content_type.startswith("multipart/form-data"):
         try:
             product = Product.objects.get(id=product_id)
@@ -80,9 +81,7 @@ def update_product_image(request, product_id):
         
 @require_http_methods(['DELETE'])
 def delete_product(request, product_id):
-    if request.user.role != User.ADMIN:
-        return JsonResponse({'message': 'Access denied: Admins only'}, status=403)
-    
+
     try:
         product = Product.objects.get(id=product_id)
         if product.image and os.path.isfile(product.image.path):

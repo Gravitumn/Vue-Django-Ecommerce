@@ -27,4 +27,5 @@ urlpatterns = [
     path('api/update_product/<int:product_id>/',product_views.update_product,name='update_product'),
     path('api/update_product_image/<int:product_id>/',product_views.update_product_image,name='update_product_image'),
     path('api/delete_product/<int:product_id>/',product_views.delete_product,name = 'delete_product'),
+    
 ]
