@@ -92,7 +92,7 @@ export default {
   align-items: center;
   display: flex;
   background-color: #e8a1fd;
-  border-radius: 20px 0px 0px 20px;
+  border-radius: 40px 0px 0px 40px;
   font-size: 1.5vw;
 }
 .search-box {
@@ -112,12 +112,14 @@ export default {
   width: 8.25%;
   height: 100%;
   background-color: #f5be64;
-  border-radius: 0px 20px 20px 0px;
+  border-radius: 0px 40px 40px 0px;
   align-content: center;
   justify-content: center;
 }
 .search-icon{
-    height:35%;
+    padding-top:5%;
+    padding-right:10%;
+    height:1.5vw;
     width: auto;
 }
 
