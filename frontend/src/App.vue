@@ -5,7 +5,7 @@
   <router-view />
 </template>
 
-<style scoped>
+<style>
 /* You can add any global styles here */
 @import url('https://fonts.googleapis.com/css2?family=Madimi+One&display=swap');
 body {
