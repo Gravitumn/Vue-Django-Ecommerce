@@ -57,7 +57,7 @@ export default {
 };
 </script>
 
-<style>
+<style >
 .search-bar {
   height: 6.59vh;
   width: 63.32vw;

@@ -3,7 +3,7 @@
     <CContainer fluid class="custom-container">
       <navbar-logo/>
       <search-bar/>
-      <auth-profile :is-authenticated="authStore.isAuthenticated" :user="authStore.user"/>
+      <auth-profile :user="user" :isAuthenticated="isAuthenticated" @logout="logout"/>
     </CContainer>
   </CNavbar>
 </template>
@@ -13,9 +13,6 @@ import NavbarLogo from './NavbarLogo.vue';
 import SearchBar from './SearchBar.vue';
 import AuthProfile from './AuthProfile.vue';
 import { CContainer, CNavbar } from '@coreui/vue';
-import { useAuthStore } from "../../store/auth.js";
-import { useRouter } from "vue-router";
-
 export default {
   name:"MainNavbar",
   components:{
@@ -25,18 +22,15 @@ export default {
     CNavbar,
     CContainer,
   },
-  setup() {
-    const authStore = useAuthStore();
-    const router = useRouter();
-
-    return {
-      authStore,
-      router,
-    };
+  props: {
+    user: Object,
+    isAuthenticated: Boolean
   },
-  async mounted() {
-    await this.authStore.fetchUser();
-  },
+  methods: {
+    logout() {
+      this.$emit("logout");
+    }
+  }
 };
 </script>
 

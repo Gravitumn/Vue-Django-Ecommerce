@@ -5,7 +5,6 @@ import Register from "./pages/Register.vue";
 import UserManagement from './admin/UserManagement.vue';
 import AdminProductManagement from './admin/AdminProductManagement.vue';
 import ProductManagement from './pages/ProductManagement.vue';
-import Homepage from './pages/Homepage.vue';
 
 function isAdmin() {
     const parsedAuthState = JSON.parse(localStorage.getItem('authState'));
@@ -45,11 +44,6 @@ const routes = [
         path: '/ProductManagement',
         name: 'Productmanagement',
         component: ProductManagement
-    },
-    {
-        path: '/Homepage',
-        name:'Homepage',
-        component: Homepage
     },
 ]
 

@@ -52,7 +52,7 @@
         </tbody>
       </table>
   
-      <!-- Edit User Modal -->
+      <!-- Edit Product Modal -->
       <div v-if="editing()" class="modal">
         <h2>Edit Product</h2>
         <form @submit.prevent="updateProduct" enctype="multipart/form-data">

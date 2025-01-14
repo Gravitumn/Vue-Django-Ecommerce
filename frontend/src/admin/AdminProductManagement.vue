@@ -101,7 +101,7 @@ export default {
   methods: {
     async fetchProduct() {
       try {
-        const response = await axios.get("/api/get_all_products");
+        const response = await axios.get("/api/admin_get_all_products");
         this.products = response.data;
         console.log(this.products);
       } catch (error) {
