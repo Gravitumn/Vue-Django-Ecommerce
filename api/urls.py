@@ -23,6 +23,7 @@ urlpatterns = [
 
     #product
     path('api/get_all_products',product_views.get_all_products,name='get_all_products'),
+    path('api/admin_get_all_products',product_views.admin_get_all_products,name='admin_get_all_products'),
     path('api/addProduct',product_views.add_product,name='add_product'),
     path('api/update_product/<int:product_id>/',product_views.update_product,name='update_product'),
     path('api/update_product_image/<int:product_id>/',product_views.update_product_image,name='update_product_image'),
