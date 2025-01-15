@@ -4,6 +4,7 @@ from django.urls import path, include
 from django.urls import path
 from .views import user_views
 from .views import product_views
+from .views import category_views
 from rest_framework.routers import DefaultRouter
 
 
@@ -29,4 +30,8 @@ urlpatterns = [
     path('api/update_product_image/<int:product_id>/',product_views.update_product_image,name='update_product_image'),
     path('api/delete_product/<int:product_id>/',product_views.delete_product,name = 'delete_product'),
     
+    #Category
+    path('api/get_super_category',category_views.get_super_category,name='get_super_category'),
+    path('api/get_sub_category',category_views.get_sub_category,name='get_sub_category'),
+    path('api/get_sub_category_by_parent/<int:parent_id>',category_views.get_sub_category_by_parent,name='get_sub_category_by_parent'),
 ]

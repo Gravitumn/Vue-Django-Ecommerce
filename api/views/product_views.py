@@ -21,6 +21,14 @@ def add_product(request):
 #if used by "USER" return all products added by that user
 @require_http_methods(['GET'])
 def get_all_products(request):
+    products = Product.objects.filter(user=request.user).values('id', 'name', 'price', 'image')
+    for product in products:
+        if product['image']:
+            product['image'] = request.build_absolute_uri(default_storage.url(product['image']))
+    return JsonResponse(list(products), safe=False)
+
+@require_http_methods(['GET'])
+def admin_get_all_products(request):
     if request.user.role == User.ADMIN:
         products = Product.objects.values('id','name','price','image','user')
         for product in products:
