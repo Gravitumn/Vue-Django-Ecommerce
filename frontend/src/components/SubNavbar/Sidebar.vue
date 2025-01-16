@@ -6,12 +6,7 @@
       <CNavItem href="#"> E-reading & books </CNavItem>
 
       <CNavTitle class="side-bar-title"> Shop by department </CNavTitle>
-      <CNavItem href="#"> Gaming </CNavItem>
-      <CNavItem href="#"> Decorations </CNavItem>
-      <CNavItem href="#"> cloths & fashions </CNavItem>
-      <CNavItem href="#"> Stationary </CNavItem>
-      <CNavItem href="#"> Toy & Collection </CNavItem>
-      <CNavItem href="#"> DIY </CNavItem>
+      <CNavItem v-for="category in superCategories" :key="category.id" class="department">{{ category.name }}</CNavItem>
     </CSidebarNav>
   </CSidebar>
 </template>
@@ -26,6 +21,9 @@ export default {
     CNavItem,
     CNavTitle,
   },
+  props:{
+    superCategories:Array,
+  }
 };
 </script>
 
@@ -35,7 +33,8 @@ export default {
   top: 0;
   left: 0;
   height: 100vh;
-  widows: 26.15vw;
+  width: 26.15vw;
+  box-shadow:0 0 0 10000px rgba(0,0,0,.50) !important;
 }
 .side-bar-title{
   color:black !important;
@@ -45,5 +44,9 @@ export default {
   display: flex;
   justify-content: left;
   margin-left: 5%;
+}
+.department{
+  display: flex;
+  margin: 1.5vw;
 }
 </style>

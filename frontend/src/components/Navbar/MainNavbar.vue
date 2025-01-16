@@ -2,7 +2,7 @@
   <CNavbar expand="lg" color-scheme="light" class="custom-navbar">
     <CContainer fluid class="custom-container">
       <navbar-logo/>
-      <search-bar/>
+      <search-bar :superCategories="superCategories"/>
       <auth-profile :user="user" :isAuthenticated="isAuthenticated" @logout="logout"/>
     </CContainer>
   </CNavbar>
@@ -24,7 +24,8 @@ export default {
   },
   props: {
     user: Object,
-    isAuthenticated: Boolean
+    isAuthenticated: Boolean,
+    superCategories: Array,
   },
   methods: {
     logout() {

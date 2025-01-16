@@ -3,9 +3,7 @@
     <CDropdown class="dropdown" :popper="false">
       <CDropdownToggle >All</CDropdownToggle>
       <CDropdownMenu class="dropdown-menu">
-        <CDropdownItem href="#">Gaming</CDropdownItem>
-        <CDropdownItem href="#">Decoration</CDropdownItem>
-        <CDropdownItem href="#">E-reading & books</CDropdownItem>
+        <CDropdownItem v-for="category in superCategories" :key="category.id"> {{ category.name }}</CDropdownItem>
       </CDropdownMenu>
     </CDropdown>
     <CFormInput
@@ -54,6 +52,9 @@ export default {
     CDropdownToggle,
     CDropdownItem,
   },
+  props:{
+    superCategories:Array,
+  }
 };
 </script>
 

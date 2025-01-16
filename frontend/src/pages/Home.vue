@@ -1,10 +1,10 @@
 <template>
   <div class="home-page">
     <div ref="sidebarRef" class="sidebar-container">
-      <sidebar v-if="showSidebar" />
+      <sidebar v-if="showSidebar" :superCategories="superCategories"/>
     </div>
     
-    <main-nav-bar :user="authStore.user" :isAuthenticated="authStore.isAuthenticated" @logout="logout" />
+    <main-nav-bar :user="authStore.user" :isAuthenticated="authStore.isAuthenticated" @logout="logout"  :superCategories="superCategories"/>
     <sub-navbar v-model:showSidebar="showSidebar"/>
     <body-content />
   </div>
@@ -19,6 +19,7 @@ import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useAuthStore } from "../store/auth.js";
 import { useRouter } from "vue-router";
+import axios from "../axios.js";
 export default {
   components: {
     MainNavBar,
@@ -46,7 +47,21 @@ export default {
       router,
     };
   },
+  data(){
+    return {
+      superCategories: [],
+    }
+  },
   methods: {
+    async fetchSuperCategories(){
+      try{
+        const response = await axios.get("/api/get_super_category");
+        this.superCategories = response.data;
+        console.log(this.superCategories);
+      }catch(error){
+        console.error("Error fetching super categories:", error);
+      }
+    },
     async logout() {
       try {
         await this.authStore.logout(this.$router);
@@ -57,6 +72,7 @@ export default {
   },
   async mounted() {
     await this.authStore.fetchUser();
+    await this.fetchSuperCategories();
   },
 };
 </script>
@@ -73,7 +89,6 @@ export default {
   top: 0;
   left: 0;
   height: 100vh;
-  widows: 26.15vw;
   z-index: 1100;
 }
 </style>
