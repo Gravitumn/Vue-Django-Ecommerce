@@ -10,18 +10,38 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 @require_http_methods(['POST'])
+@require_http_methods(['POST'])
 def add_product(request):
-    form = ProductForm(request.POST,request.FILES)
-    if form.is_valid():
-        product = form.save()
-        return JsonResponse({'message': 'Product added successfully', 'product_id': product.id}, status=201)
-    return JsonResponse({'errors': form.errors}, status=400)
+    try:
+        category_data = request.POST.get('category')
+        if category_data:
+            category_ids = json.loads(category_data)
+        else:
+            return JsonResponse({'errors': {'category': 'This field is required.'}}, status=400)
+        
+        print(category_ids)
+        request.POST._mutable = True
+        request.POST.setlist('category', category_ids)  # Set as a list of IDs
+        request.POST._mutable = False
+        
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            product = form.save(commit=False) 
+            
+            product.save()
+            
+            product.category.set(category_ids)
+            
+            return JsonResponse({'message': 'Product added successfully', 'product_id': product.id}, status=201)
+        return JsonResponse({'errors': form.errors}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({'errors': {'category': 'Invalid JSON format.'}}, status=400)
 
 #Get all products in database for "ADMIN", 
 #if used by "USER" return all products added by that user
 @require_http_methods(['GET'])
 def get_all_products(request):
-    products = Product.objects.filter(user=request.user).values('id', 'name', 'price', 'image')
+    products = Product.objects.filter(user=request.user).values('id', 'name', 'price', 'image','category')
     for product in products:
         if product['image']:
             product['image'] = request.build_absolute_uri(default_storage.url(product['image']))
@@ -30,17 +50,13 @@ def get_all_products(request):
 @require_http_methods(['GET'])
 def admin_get_all_products(request):
     if request.user.role == User.ADMIN:
-        products = Product.objects.values('id','name','price','image','user')
+        products = Product.objects.values('id','name','price','image','user','category')
         for product in products:
             if product['image']:
                 product['image'] = request.build_absolute_uri(default_storage.url(product['image']))
         return JsonResponse(list(products),safe=False)
     else:
-        products = Product.objects.filter(user=request.user).values('id', 'name', 'price', 'image')
-        for product in products:
-            if product['image']:
-                product['image'] = request.build_absolute_uri(default_storage.url(product['image']))
-        return JsonResponse(list(products), safe=False)
+        return JsonResponse({'message':'Access Denied, Admin Only'},status=403)
 
 
 @require_http_methods(['PUT'])

@@ -14,12 +14,17 @@
         placeholder="Price"
         required
       />
+      <multi-selection
+        :options="subCategories"
+        v-model:categories="newProduct.categories"
+      />
       <input
         type="file"
         accept="image/*"
         @change="handleFileChange_onCreate"
         required
       />
+
       <button type="submit">Add new Product</button>
     </form>
 
@@ -32,10 +37,11 @@
           <th>Product Name</th>
           <th>Price</th>
           <th>User</th>
+          <th>Category</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="product in products" :key="product.id">
+        <tr v-for="(product, index) in products" :key="product.id">
           <td>
             <img
               :src="product.image"
@@ -46,6 +52,9 @@
           <td>{{ product.name }}</td>
           <td>{{ product.price }}</td>
           <td>{{ product.user }}</td>
+          <td>
+            {{ getCategories(index) }}
+          </td>
           <td>
             <button @click="editProduct(product)">Edit</button>
             <button @click="deleteProduct(product.id)">Delete</button>
@@ -66,6 +75,10 @@
           min="0"
           placeholder="Price"
         />
+        <multi-selection
+          :options="subCategories"
+          v-model:selected="editingProduct.categories"
+        />
         <input
           type="file"
           accept="image/*"
@@ -75,10 +88,12 @@
         <button @click="cancelEdit">Cancel</button>
       </form>
     </div>
+    <button @click="showData">click</button>
   </div>
 </template>
 
 <script>
+import MultiSelection from "../components/MultiSelection.vue";
 import axios from "../axios.js";
 import { getCSRFToken } from "../store/auth.js";
 export default {
@@ -89,23 +104,70 @@ export default {
         name: "",
         price: 0,
         image: null,
+        categories: [],
       },
       editingProduct: {
         id: 0,
         name: "",
         price: 0,
         image: null,
+        categories: [],
       },
+      subCategories: [],
     };
   },
+  components: {
+    MultiSelection,
+  },
   methods: {
+    getCategories(index) {
+      let newCategories = "";
+      for (let i = 0; i < this.products[index].categories.length; i++) {
+        var temp = this.subCategories.find(
+          ({ id }) => id === this.products[index].categories[i]
+        );
+        // console.log("temp=",temp);
+        if (temp) {
+          newCategories = newCategories.concat(", ",temp.name);
+        }
+      }
+      return newCategories;
+    },
+    showData() {
+      console.log(this.products.length);
+      console.log(this.products);
+    },
     async fetchProduct() {
       try {
         const response = await axios.get("/api/admin_get_all_products");
-        this.products = response.data;
-        console.log(this.products);
+        this.products = response.data.reduce((acc, product) => {
+          const existingProduct = acc.find((item) => item.id === product.id);
+
+          if (existingProduct) {
+            if (!existingProduct.categories.includes(product.category)) {
+              existingProduct.categories.push(product.category);
+            }
+          } else {
+            acc.push({
+              ...product,
+              categories: [product.category],
+            });
+          }
+
+          return acc;
+        }, []);
+        // console.log(this.products[0]);
       } catch (error) {
         console.error("Error fetching products:", error);
+      }
+    },
+    async fetchSubCategories() {
+      try {
+        const response = await axios.get("/api/get_sub_category");
+        this.subCategories = response.data;
+        // console.log(this.subCategories);
+      } catch (error) {
+        console.error("Error fetching super categories:", error);
       }
     },
     handleFileChange_onCreate(event) {
@@ -127,21 +189,33 @@ export default {
       }
     },
     async addProduct() {
+      console.log("ok");
+      console.log(this.newProduct.categories);
       try {
-        const authState = JSON.parse(localStorage.getItem('authState'));
-        console.log(authState.user)
+        const authState = JSON.parse(localStorage.getItem("authState"));
+        const category_data = JSON.parse(
+          JSON.stringify(this.newProduct.categories)
+        );
+        let arr = [];
+        for (let i = 0; i < category_data.length; i++) {
+          arr.push(category_data[i].id);
+        }
+        console.log(arr);
+        console.log(authState.user);
+
         const formData = new FormData();
         formData.append("name", this.newProduct.name);
         formData.append("price", this.newProduct.price);
         formData.append("user", authState.user.id);
+        formData.append("category", JSON.stringify(arr));
         if (this.newProduct.image) {
           formData.append("image", this.newProduct.image);
         }
         const response = await axios.post("api/addProduct", formData, {
           headers: {
-            "X-CSRFToken": getCSRFToken(), // Pass CSRF token here
+            "X-CSRFToken": getCSRFToken(),
           },
-          withCredentials: true, // Include credentials if necessary
+          withCredentials: true,
         });
 
         if (response.status === 201) {
@@ -181,7 +255,11 @@ export default {
       try {
         const Jsonresponse = await axios.put(
           `/api/update_product/${this.editingProduct.id}/`,
-          { name: this.editingProduct.name, price: this.editingProduct.price },
+          {
+            name: this.editingProduct.name,
+            price: this.editingProduct.price,
+            categories: this.editingProduct.categories,
+          },
           {
             headers: {
               "X-CSRFToken": getCSRFToken(), // Pass CSRF token here
@@ -232,6 +310,7 @@ export default {
   },
   mounted() {
     this.fetchProduct();
+    this.fetchSubCategories();
   },
 };
 </script>

@@ -1,6 +1,6 @@
 <template>
   <CNavbarBrand class="logo">
-    <router-link to="/Hometest" class="logo-text">LOFI SHOP</router-link>
+    <router-link to="/" class="logo-text">LOFI SHOP</router-link>
   </CNavbarBrand>
 </template>
 
