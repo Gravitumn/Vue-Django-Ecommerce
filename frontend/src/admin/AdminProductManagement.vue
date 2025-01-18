@@ -1,4 +1,4 @@
-<template>
+  <template>
   <div class="admin-product-management">
     <h1>Product Management</h1>
 
@@ -64,7 +64,7 @@
     </table>
 
     <!-- Edit User Modal -->
-    <div v-if="editing()" class="modal">
+    <div v-if="editing()" class="custom-modal">
       <h2>Edit Product</h2>
       <form @submit.prevent="updateProduct" enctype="multipart/form-data">
         <input v-model="editingProduct.name" placeholder="Product Name" />
@@ -77,7 +77,7 @@
         />
         <multi-selection
           :options="subCategories"
-          v-model:selected="editingProduct.categories"
+          v-model:categories="editingProduct.categories"
         />
         <input
           type="file"
@@ -92,7 +92,7 @@
   </div>
 </template>
 
-<script>
+  <script>
 import MultiSelection from "../components/MultiSelection.vue";
 import axios from "../axios.js";
 import { getCSRFToken } from "../store/auth.js";
@@ -128,7 +128,7 @@ export default {
         );
         // console.log("temp=",temp);
         if (temp) {
-          newCategories = newCategories.concat(", ",temp.name);
+          newCategories = newCategories.concat(", ", temp.name);
         }
       }
       return newCategories;
@@ -136,6 +136,7 @@ export default {
     showData() {
       console.log(this.products.length);
       console.log(this.products);
+      console.log(this.editingProduct.categories);
     },
     async fetchProduct() {
       try {
@@ -227,38 +228,23 @@ export default {
         console.error("Error uploading product:", err);
       }
     },
-    editing() {
-      return (
-        this.editingProduct.name != "" &&
-        this.editingProduct.price != 0 &&
-        this.editingProduct.image != null
-      );
-    },
-    editProduct(product) {
-      console.log("editing");
-      this.editingProduct = {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-      };
-    },
-    cancelEdit() {
-      this.editingProduct = {
-        id: 0,
-        name: "",
-        price: 0,
-        image: null,
-      };
-    },
     async updateProduct() {
+      const category_data = JSON.parse(
+        JSON.stringify(this.editingProduct.categories)
+      );
+      console.log(category_data)
+      let arr = [];
+      for (let i = 0; i < category_data.length; i++) {
+        arr.push(category_data[i].id);
+      }
+      console.log(arr);
       try {
         const Jsonresponse = await axios.put(
           `/api/update_product/${this.editingProduct.id}/`,
           {
             name: this.editingProduct.name,
             price: this.editingProduct.price,
-            categories: this.editingProduct.categories,
+            categories: JSON.stringify(arr),
           },
           {
             headers: {
@@ -294,6 +280,33 @@ export default {
         console.error("Error updating product:", err);
       }
     },
+    editing() {
+      return (
+        this.editingProduct.name != "" &&
+        this.editingProduct.price != 0 &&
+        this.editingProduct.image != null &&
+        this.editingProduct.categories.length != []
+      );
+    },
+    editProduct(product) {
+      console.log("editing");
+      this.editingProduct = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        categories: product.categories,
+      };
+    },
+    cancelEdit() {
+      this.editingProduct = {
+        id: 0,
+        name: "",
+        price: 0,
+        image: null,
+        categories: [],
+      };
+    },
     async deleteProduct(productId) {
       try {
         await axios.delete(`/api/delete_product/${productId}/`, {
@@ -315,7 +328,7 @@ export default {
 };
 </script>
 
-<style>
+  <style>
 .product-management {
   max-width: 800px;
   margin: auto;
@@ -333,7 +346,7 @@ table td {
   text-align: left;
 }
 
-.modal {
+.custom-modal {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -342,5 +355,6 @@ table td {
   padding: 20px;
   border: 1px solid #ddd;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
 }
 </style>

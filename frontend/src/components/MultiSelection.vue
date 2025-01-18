@@ -11,7 +11,7 @@
       </option>
     </select>
     <p>
-      Selected Options:
+      Selected Categories:
       <input type="text" :value="formattedSelectedOptions" readonly />
     </p>
   </div>

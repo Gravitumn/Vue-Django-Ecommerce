@@ -61,7 +61,6 @@ def admin_get_all_products(request):
 
 @require_http_methods(['PUT'])
 def update_product(request, product_id):
-
     try:
         product = Product.objects.get(id=product_id)
         if request.body:
@@ -69,6 +68,7 @@ def update_product(request, product_id):
                 data = json.loads(request.body)
                 product.name = data.get('name', product.name)
                 product.price = data.get('price', product.price)
+                product.category.set(json.loads(data.get('categories')))
             except json.JSONDecodeError:
                 return JsonResponse({'message': 'Invalid JSON data'}, status=400)
 
