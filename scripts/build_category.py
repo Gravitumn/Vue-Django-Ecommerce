@@ -91,7 +91,7 @@ categories = {
         "Music & Instrumentals"
     ],
     "Office":[
-        "Stationary",
+        "Stationery",
         "Office Furniture",
         "Storage Solutions",
         "Printer & Scanners",

@@ -3,7 +3,7 @@ from django.http import JsonResponse
 import json
 from django.views.decorators.http import require_http_methods
 from ..forms import ProductForm
-from ..models import Product
+from ..models import Category, Product
 from django.core.files.storage import default_storage
 
 from django.contrib.auth import get_user_model
@@ -46,6 +46,25 @@ def get_all_products(request):
         if product['image']:
             product['image'] = request.build_absolute_uri(default_storage.url(product['image']))
     return JsonResponse(list(products), safe=False)
+
+#Get all products in database for "ADMIN", 
+#if used by "USER" return all products added by that user
+@require_http_methods(['GET'])
+def show_all_products(request):
+    products = Product.objects.distinct().values('id', 'name', 'price', 'image')
+    for product in products:
+        if product['image']:
+            product['image'] = request.build_absolute_uri(default_storage.url(product['image']))
+    return JsonResponse(list(products), safe=False)
+
+@require_http_methods(['GET'])
+def get_super_category_products(request,super_category_id):
+    sub_category = Category.objects.filter(parent_id=super_category_id).values('id','name','parent_id')
+    products = Product.objects.filter(category__in=sub_category.values_list('id', flat=True)).distinct().values('id', 'name', 'price','image')
+    for product in products:
+        if product['image']:
+            product['image'] = request.build_absolute_uri(default_storage.url(product['image']))
+    return JsonResponse(list(products),safe=False)
 
 @require_http_methods(['GET'])
 def admin_get_all_products(request):

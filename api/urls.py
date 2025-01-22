@@ -24,11 +24,13 @@ urlpatterns = [
 
     #product
     path('api/get_all_products',product_views.get_all_products,name='get_all_products'),
+    path('api/show_all_products',product_views.show_all_products,name='show_all_products'),
     path('api/admin_get_all_products',product_views.admin_get_all_products,name='admin_get_all_products'),
     path('api/addProduct',product_views.add_product,name='add_product'),
     path('api/update_product/<int:product_id>/',product_views.update_product,name='update_product'),
     path('api/update_product_image/<int:product_id>/',product_views.update_product_image,name='update_product_image'),
     path('api/delete_product/<int:product_id>/',product_views.delete_product,name = 'delete_product'),
+    path('api/get_super_category_products/<int:super_category_id>',product_views.get_super_category_products, name= 'get_super_category_products'),
     
     #Category
     path('api/get_super_category',category_views.get_super_category,name='get_super_category'),

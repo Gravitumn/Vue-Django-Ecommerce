@@ -1,5 +1,16 @@
 <template>
   <div class="product-management">
+    <div ref="sidebarRef" class="sidebar-container">
+      <sidebar v-if="showSidebar" :superCategories="superCategories" />
+    </div>
+
+    <main-nav-bar
+      :user="authStore.user"
+      :isAuthenticated="authStore.isAuthenticated"
+      @logout="logout"
+      :superCategories="superCategories"
+    />
+    <sub-navbar v-model:showSidebar="showSidebar" />
     <h1>Product Management</h1>
 
     <!-- Add Product Form -->
@@ -89,6 +100,13 @@
 </template>
   
   <script>
+import MainNavBar from "../components/Navbar/MainNavbar.vue";
+import SubNavbar from "../components/SubNavbar/SubNavbar.vue";
+import Sidebar from "../components/SubNavbar/Sidebar.vue";
+import { ref } from "vue";
+import { onClickOutside } from "@vueuse/core";
+import { useAuthStore } from "../store/auth.js";
+import { useRouter } from "vue-router";
 import axios from "../axios.js";
 import { getCSRFToken } from "../store/auth";
 import MultiSelection from "../components/MultiSelection.vue";
@@ -110,10 +128,34 @@ export default {
         categories: [],
       },
       subCategories: [],
+      superCategories: [],
     };
   },
   components: {
     MultiSelection,
+    MainNavBar,
+    SubNavbar,
+    Sidebar,
+  },
+  setup() {
+    const showSidebar = ref(false);
+    const authStore = useAuthStore();
+    const router = useRouter();
+    const sidebarRef = ref(null);
+
+    onClickOutside(sidebarRef, () => {
+      console.log(sidebarRef);
+      if (showSidebar.value) {
+        showSidebar.value = false;
+      }
+    });
+
+    return {
+      showSidebar,
+      sidebarRef,
+      authStore,
+      router,
+    };
   },
   methods: {
     getCategories(index) {
@@ -124,10 +166,26 @@ export default {
         );
         // console.log("temp=",temp);
         if (temp) {
-          newCategories = newCategories.concat(", ",temp.name);
+          newCategories = newCategories.concat(", ", temp.name);
         }
       }
       return newCategories;
+    },
+    async fetchSuperCategories() {
+      try {
+        const response = await axios.get("/api/get_super_category");
+        this.superCategories = response.data;
+        console.log(this.superCategories);
+      } catch (error) {
+        console.error("Error fetching super categories:", error);
+      }
+    },
+    async logout() {
+      try {
+        await this.authStore.logout(this.$router);
+      } catch (error) {
+        console.error(error);
+      }
     },
     async fetchProduct() {
       try {
@@ -250,7 +308,7 @@ export default {
       const category_data = JSON.parse(
         JSON.stringify(this.editingProduct.categories)
       );
-      console.log(category_data)
+      console.log(category_data);
       let arr = [];
       for (let i = 0; i < category_data.length; i++) {
         arr.push(category_data[i].id);
@@ -259,7 +317,11 @@ export default {
       try {
         const Jsonresponse = await axios.put(
           `/api/update_product/${this.editingProduct.id}/`,
-          { name: this.editingProduct.name, price: this.editingProduct.price, categories: JSON.stringify(arr), },
+          {
+            name: this.editingProduct.name,
+            price: this.editingProduct.price,
+            categories: JSON.stringify(arr),
+          },
           {
             headers: {
               "X-CSRFToken": getCSRFToken(), // Pass CSRF token here
@@ -308,17 +370,31 @@ export default {
       }
     },
   },
-  mounted() {
-    this.fetchProduct();
-    this.fetchSubCategories();
+  async mounted() {
+    await this.fetchProduct();
+    await this.fetchSubCategories();
+    await this.authStore.fetchUser();
+    await this.fetchSuperCategories();
   },
 };
 </script>
   
-  <style>
+  <style scoped>
+@import url("https://fonts.googleapis.com/css2?family=Madimi+One&display=swap");
 .product-management {
-  max-width: 800px;
-  margin: auto;
+  position: relative;
+  width:100vw !important;
+  padding-top: 20vh;
+  /* margin: auto; */
+  font-family: "Madimi One";
+}
+
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 1100;
 }
 
 table {

@@ -15,7 +15,7 @@
 <script>
 import Background from "./Background.vue";
 import BodyLogo from "./BodyLogo.vue";
-import Catalog from "./Catalog.vue";
+import Catalog from "./AdCatalog.vue";
 export default {
   name: "BodyContent",
   components: {

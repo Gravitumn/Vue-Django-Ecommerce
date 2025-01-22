@@ -1,5 +1,11 @@
 <template>
   <div class="user-management">
+    <div ref="sidebarRef" class="sidebar-container">
+      <sidebar v-if="showSidebar" :superCategories="superCategories"/>
+    </div>
+    
+    <main-nav-bar :user="authStore.user" :isAuthenticated="authStore.isAuthenticated" @logout="logout"  :superCategories="superCategories"/>
+    <sub-navbar v-model:showSidebar="showSidebar"/>
     <h1>User Management</h1>
 
     <!-- Add User Form -->
@@ -62,10 +68,42 @@
 </template>
   
   <script>
+  import MainNavBar from "../components/Navbar/MainNavbar.vue";
+import SubNavbar from "../components/SubNavbar/SubNavbar.vue";
+import Sidebar from "../components/SubNavbar/Sidebar.vue";
+import { ref } from "vue";
+import { onClickOutside } from "@vueuse/core";
+import { useAuthStore } from "../store/auth.js";
+import { useRouter } from "vue-router";
 import axios from "../axios.js";
 import { getCSRFToken } from "../store/auth";
 
 export default {
+  components: {
+    MainNavBar,
+    SubNavbar,
+    Sidebar,
+  },
+  setup() {
+    const showSidebar = ref(false);
+    const authStore = useAuthStore();
+    const router = useRouter();
+    const sidebarRef = ref(null);
+
+    onClickOutside(sidebarRef, () => {
+      console.log(sidebarRef)
+      if (showSidebar.value) {
+        showSidebar.value = false;
+      }
+    });
+
+    return {
+      showSidebar,
+      sidebarRef,
+      authStore,
+      router,
+    };
+  },
   data() {
     return {
       users: [],
@@ -75,9 +113,26 @@ export default {
         password: "",
       },
       editingUser: null, // Stores the user currently being edited
+      superCategories: [],
     };
   },
   methods: {
+    async fetchSuperCategories(){
+      try{
+        const response = await axios.get("/api/get_super_category");
+        this.superCategories = response.data;
+        console.log(this.superCategories);
+      }catch(error){
+        console.error("Error fetching super categories:", error);
+      }
+    },
+    async logout() {
+      try {
+        await this.authStore.logout(this.$router);
+      } catch (error) {
+        console.error(error);
+      }
+    },
     // Fetch all users
     async fetchUsers() {
       try {
@@ -165,16 +220,20 @@ export default {
       }
     },
   },
-  mounted() {
-    this.fetchUsers(); // Fetch users on component mount
+  async mounted() {
+    await this.fetchUsers(); // Fetch users on component mount
+    await this.authStore.fetchUser();
+    await this.fetchSuperCategories();
   },
 };
 </script>
   
   <style>
 .user-management {
-  max-width: 800px;
-  margin: auto;
+  position: relative;
+  padding-top: 20vh;
+  /* margin: auto; */
+  font-family: "Madimi One";
 }
 
 table {

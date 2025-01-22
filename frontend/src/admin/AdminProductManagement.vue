@@ -1,5 +1,11 @@
   <template>
   <div class="admin-product-management">
+    <div ref="sidebarRef" class="sidebar-container">
+      <sidebar v-if="showSidebar" :superCategories="superCategories"/>
+    </div>
+    
+    <main-nav-bar :user="authStore.user" :isAuthenticated="authStore.isAuthenticated" @logout="logout"  :superCategories="superCategories"/>
+    <sub-navbar v-model:showSidebar="showSidebar"/>
     <h1>Product Management</h1>
 
     <!-- Add Product Form -->
@@ -93,9 +99,16 @@
 </template>
 
   <script>
+  import MainNavBar from "../components/Navbar/MainNavbar.vue";
+import SubNavbar from "../components/SubNavbar/SubNavbar.vue";
+import Sidebar from "../components/SubNavbar/Sidebar.vue";
 import MultiSelection from "../components/MultiSelection.vue";
 import axios from "../axios.js";
 import { getCSRFToken } from "../store/auth.js";
+import { ref } from "vue";
+import { onClickOutside } from "@vueuse/core";
+import { useAuthStore } from "../store/auth.js";
+import { useRouter } from "vue-router";
 export default {
   data() {
     return {
@@ -114,12 +127,32 @@ export default {
         categories: [],
       },
       subCategories: [],
+      superCategories: [],
     };
   },
   components: {
     MultiSelection,
+    MainNavBar,
+    SubNavbar,
+    Sidebar,
   },
   methods: {
+    async fetchSuperCategories(){
+      try{
+        const response = await axios.get("/api/get_super_category");
+        this.superCategories = response.data;
+        console.log(this.superCategories);
+      }catch(error){
+        console.error("Error fetching super categories:", error);
+      }
+    },
+    async logout() {
+      try {
+        await this.authStore.logout(this.$router);
+      } catch (error) {
+        console.error(error);
+      }
+    },
     getCategories(index) {
       let newCategories = "";
       for (let i = 0; i < this.products[index].categories.length; i++) {
@@ -321,17 +354,43 @@ export default {
       }
     },
   },
-  mounted() {
-    this.fetchProduct();
-    this.fetchSubCategories();
+  setup() {
+    const showSidebar = ref(false);
+    const authStore = useAuthStore();
+    const router = useRouter();
+    const sidebarRef = ref(null);
+
+    onClickOutside(sidebarRef, () => {
+      console.log(sidebarRef)
+      if (showSidebar.value) {
+        showSidebar.value = false;
+      }
+    });
+
+    return {
+      showSidebar,
+      sidebarRef,
+      authStore,
+      router,
+    };
+  },
+  async mounted() {
+    await this.fetchProduct();
+    await this.fetchSubCategories();
+    await this.authStore.fetchUser();
+    await this.fetchSuperCategories();
   },
 };
 </script>
 
   <style>
-.product-management {
-  max-width: 800px;
-  margin: auto;
+  @import url("https://fonts.googleapis.com/css2?family=Madimi+One&display=swap");
+.admin-product-management {
+  position: relative;
+  width:100vw !important;
+  padding-top: 20vh;
+  /* margin: auto; */
+  font-family: "Madimi One";
 }
 
 table {

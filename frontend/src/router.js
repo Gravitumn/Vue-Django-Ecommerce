@@ -6,6 +6,7 @@ import UserManagement from './admin/UserManagement.vue';
 import AdminProductManagement from './admin/AdminProductManagement.vue';
 import ProductManagement from './pages/ProductManagement.vue';
 import Test from './pages/test.vue';
+import Products from './pages/Products.vue';
 
 function isAdmin() {
     const parsedAuthState = JSON.parse(localStorage.getItem('authState'));
@@ -50,6 +51,11 @@ const routes = [
         path:'/test',
         name:'Test',
         component: Test
+    },
+    {
+        path:'/Products/:superCategory?',
+        name:'Products',
+        component:Products,
     }
 ]
 

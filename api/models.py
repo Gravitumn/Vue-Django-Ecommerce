@@ -46,7 +46,7 @@ class Product(models.Model):
     category = models.ManyToManyField(Category, blank=False)
 
     def __str__(self):
-        return self.name + self.price + self.category
+        return self.name
 
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  

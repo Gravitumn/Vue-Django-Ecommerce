@@ -42,7 +42,7 @@ export default {
 
 <style>
 .custom-sub-navbar {
-  position: absolute ;
+  position: fixed !important ;
   top: 10.87vh !important;
   left: 0;
   background-color: #3335e1;
